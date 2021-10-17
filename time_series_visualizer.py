@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import calendar
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
 # Import data (Make sure to parse dates. Consider setting index column to 'date'.)
-df = pd.read_csv('./fcc-forum-pageviews.csv', parse_dates=['date']).set_index('date')
+df = pd.read_csv('./fcc-forum-pageviews.csv', parse_dates=['date'], index_col='date')
 
 # Clean data (Keep middle 95 percentiles)
 df = df[df.value.between(df.value.quantile(0.025), df.value.quantile(0.975))]    
@@ -25,13 +26,12 @@ def draw_line_plot():
 
 def draw_bar_plot():
     # Copy and modify data for monthly bar plot
-    df_bar = None
+    df_bar = df.groupby([df.index.year, df.index.month]).value.mean().unstack()
 
     # Draw bar plot
-
-
-
-
+    fig, ax = plt.subplots()
+    df_bar.plot(ax=ax, kind='bar', figsize=(8, 6), ylabel='Average Page Views', xlabel='Years')
+    ax.legend(title='Months', labels=calendar.month_name[1:])
 
     # Save image and return fig (don't change this part)
     fig.savefig('bar_plot.png')
